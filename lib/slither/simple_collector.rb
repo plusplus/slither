@@ -8,7 +8,7 @@ class Slither
       @parsed = {}
     end
 
-    def line(section_type, data)
+    def process_record(section_type, data)
       parsed[section_type] ||= []
       parsed[section_type] << data
     end

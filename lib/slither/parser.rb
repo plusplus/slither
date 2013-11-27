@@ -17,7 +17,7 @@ class Slither
         @definition.sections.each do |section|
           if section.match(line)
             validate_length(line, section)
-            collector.line(section.name, section.parse(line))
+            collector.process_record(section.name, section.parse(line))
           end
         end
       end
@@ -43,7 +43,7 @@ class Slither
         
         @definition.sections.each do |section|
           if section.match(record)
-            collector.line(section.name, section.parse(record))
+            collector.process_record(section.name, section.parse(record))
           end
         end
       end
