@@ -8,8 +8,8 @@ class Slither
       @mode = :linear
     end
     
-    def parse()
-      parsed = {}
+    def parse(collector = nil)
+      collector ||= default_collector
 
       @file.each_line do |line|
         line.chomp! if line
@@ -17,15 +17,11 @@ class Slither
         @definition.sections.each do |section|
           if section.match(line)
             validate_length(line, section)
-            parsed = fill_content(line, section, parsed)
+            collector.line(section.name, section.parse(line))
           end
         end
       end
-
-      @definition.sections.each do |section|
-        raise(Slither::RequiredSectionNotFoundError, "Required section '#{section.name}' was not found.") unless parsed[section.name] || section.optional
-      end
-      parsed
+      collector.finished
     end
     
     def parse_by_bytes
@@ -47,7 +43,7 @@ class Slither
         
         @definition.sections.each do |section|
           if section.match(record)
-            parsed = fill_content(record, section, parsed)
+            collector.line(section.name, section.parse(record))
           end
         end
       end
@@ -59,13 +55,11 @@ class Slither
     end
     
     private
-    
-      def fill_content(line, section, parsed)
-        parsed[section.name] ||= []
-        parsed[section.name] << section.parse(line)
-        parsed
+
+      def default_collector
+        SimpleCollector.new(@definition)
       end
-      
+
       def validate_length(line, section)
         if line.length != section.length
           parsed_line = parse_for_error_message(line)
