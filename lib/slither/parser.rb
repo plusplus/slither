@@ -27,8 +27,8 @@ class Slither
       collector.finished
     end
 
-    def parse_by_bytes
-      parsed = {}
+    def parse_by_bytes(collector = nil)
+      collector ||= default_collector
 
       all_section_lengths = @definition.sections.map{|sec| sec.length }
       byte_length = all_section_lengths.max
@@ -51,10 +51,8 @@ class Slither
         end
       end
 
-      @definition.sections.each do |section|
-        raise(Slither::RequiredSectionNotFoundError, "Required section '#{section.name}' was not found.") unless parsed[section.name] || section.optional
-      end
-      parsed
+      collector.validate!
+      collector.finished
     end
 
     private
@@ -71,10 +69,14 @@ class Slither
       end
 
       def length_valid?(line, section)
-        if length_validation == :strict
+        case length_validation
+        when :strict
           line.length == section.length
-        else
+        when :ignore_extra_columns
           line.length >= section.length
+        else
+          line.length >= section.length ||
+          section.column_boundary?(line.length)
         end
       end
 
