@@ -99,6 +99,7 @@ class Slither
 
     # Remove trailing spaces
     def clean(cell)
+      return '' if cell.nil?
       cell.gsub(/ +\z/, '')
     end
 
