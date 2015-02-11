@@ -62,7 +62,7 @@ class Slither
     end
 
     def parse(line)
-      line_data = line.unpack(unpacker)
+      line_data = unpack(line)
       row = {}
       @columns.each_with_index do |c, i|
         row[c.name] = c.parse(line_data[i]) unless RESERVED_NAMES.include?(c.name)
@@ -89,9 +89,29 @@ class Slither
 
     private
 
-      def unpacker
-        @columns.map { |c| c.unpacker }.join('')
-      end
+    # Can't use String#unpack as it has no idea about character encodings
+    # Extract array of raw string data values from the line based on column
+    # widths
+    def unpack(line)
+      column_slices.map { |start, length| line[start, length] }
+                   .map { |value| clean(value) }
+    end
 
+    # Remove trailing spaces
+    def clean(cell)
+      cell.gsub(/ +\z/, '')
+    end
+
+    def column_slices
+      return @slices if @slices
+
+      @slices = []
+      start_index = 0
+      @columns.map(&:length).each do |l|
+        @slices << [start_index, l]
+        start_index += l
+      end
+      @slices
+    end
   end
 end
