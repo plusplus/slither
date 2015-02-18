@@ -6,7 +6,7 @@ class Slither
       @file = file_io
       # This may be used in the future for non-linear or repeating sections
       @mode = :linear
-      @length_validation = :strict
+      @length_validation = definition.options[:length_validation]
     end
 
     attr_accessor :length_validation
