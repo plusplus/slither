@@ -7,15 +7,17 @@ class Slither
       # This may be used in the future for non-linear or repeating sections
       @mode = :linear
       @length_validation = definition.options[:length_validation]
+      @encoding = definition.options[:encoding]
     end
 
-    attr_accessor :length_validation
+    attr_accessor :length_validation, :encoding
 
     def parse(collector = nil)
       collector ||= default_collector
 
       @file.each_line do |line|
         line.chomp! if line
+        line = line.force_encoding(encoding).encode('utf-8') if encoding
         next if line.empty?
         @definition.sections.each do |section|
           if section.match(line)
